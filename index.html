@@ -465,6 +465,7 @@ footer p{margin:0;max-width:70ch}
 const work=[
  ["knrm","KNRM West-Terschelling","Dronevideo · mei 2025","lucht","video/knrm.mp4"],
  ["timelapse-camera","Timelapse-opstelling","Long-term camera","bouw"],
+ ["timelapse-opbouw","Opbouw evenement","Timelapse · oktober 2020","bouw","video/timelapse-opbouw.mp4","loop"],
  ["akkrum","Jachthaven Akkrum","Luchtfoto","lucht"],
  ["beter-bereikbaar-nacht","Heerenveen Beter Bereikbaar","Nachtwerk aan de weg","bouw"],
  ["wettertoer","De Wettertoer","Voorstelling","events"],
@@ -501,7 +502,7 @@ const visible=()=>[...grid.querySelectorAll(".shot:not([hidden])")].map(s=>+s.da
 function show(i){
   cur=i;const [f,t,s,,vid]=work[i];lbCap.innerHTML=`${t}<span>${s}</span>`;
   lbVid.pause();
-  if(vid){lbImg.hidden=true;lbImg.removeAttribute("src");lbVid.hidden=false;lbVid.poster=`img/${f}.jpg`;lbVid.muted=true;lbVid.src=vid;lbVid.setAttribute("aria-label",`${t}, ${s}`);lbVid.play().catch(()=>{});}
+  if(vid){lbImg.hidden=true;lbImg.removeAttribute("src");lbVid.hidden=false;lbVid.poster=`img/${f}.jpg`;lbVid.muted=true;lbVid.loop=work[i][5]==="loop";lbVid.src=vid;lbVid.setAttribute("aria-label",`${t}, ${s}`);lbVid.play().catch(()=>{});}
   else{lbVid.hidden=true;lbVid.removeAttribute("src");lbVid.load();lbImg.hidden=false;lbImg.src=`img/${f}.jpg`;lbImg.alt=`${t}, ${s}`;}
 }
 lb.addEventListener("close",()=>lbVid.pause());

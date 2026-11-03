@@ -9,6 +9,7 @@
 <meta property="og:description" content="Luchtfotografie, livestreams en timelapses op Terschelling en aan de vaste wal.">
 <meta property="og:image" content="img/haven-west-1200.jpg">
 <meta name="theme-color" content="#e92411">
+<script>window.FIXUM_FORMSPREE="myeebabk";</script>
 <title>FIXUM foto en video · Terschelling en Friesland</title>
 <meta name="description" content="FIXUM foto en video. Luchtfotografie, livestreams en timelapses op Terschelling, vanuit West-Terschelling.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,7 +81,6 @@ nav a.cta{background:var(--accent);color:var(--on-accent)}
 /* Desktop: foto ingezoomd zodat de Brandaris (51% / 24% van de foto) rechts naast de kop staat */
 @media (min-width:1000px){
   .hero-bg{inset:auto;width:170%;max-width:none;height:auto;object-fit:fill;left:calc(85% - 86.7%);top:calc(230px - 30.6vw)}
-  .hero::before{-webkit-mask-image:radial-gradient(ellipse 300px 260px at 85% 230px,rgba(0,0,0,.5) 0%,#000 100%);mask-image:radial-gradient(ellipse 300px 260px at 85% 230px,rgba(0,0,0,.5) 0%,#000 100%)}
 }
 .hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:linear-gradient(180deg,color-mix(in srgb,var(--sea) 92%,transparent) 0%,color-mix(in srgb,var(--sea) 86%,transparent) 40%,color-mix(in srgb,var(--sea) 76%,transparent) 75%,color-mix(in srgb,var(--sea) 70%,transparent) 100%)}
@@ -202,6 +202,7 @@ form{display:grid;gap:14px;background:rgba(0,0,0,.18);padding:clamp(18px,3vw,28p
 label{display:grid;gap:6px;font-size:.88rem;font-weight:500;min-width:0}
 input,select,textarea{font:inherit;font-size:1rem;color:#1b2021;background:#fff;border:1.5px solid transparent;border-radius:4px;padding:11px 12px;width:100%}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+input[aria-invalid="true"]{border-color:var(--accent)}
 textarea{min-height:120px;resize:vertical}
 .form-msg{margin:0;font-size:.9rem;color:#fff;background:rgba(0,0,0,.25);padding:10px 12px;border-radius:4px}
 @media (max-width:800px){.contact-grid{grid-template-columns:1fr}}
@@ -487,8 +488,13 @@ document.getElementById("form").addEventListener("submit",async e=>{
   btn.disabled=true;btn.textContent="Versturen…";msg.hidden=true;
   try{
     const r=await fetch("https://formspree.io/f/"+encodeURIComponent(id),{method:"POST",body:data,headers:{Accept:"application/json"}});
-    if(!r.ok)throw new Error(r.status);
-    f.reset();say("Bedankt, je aanvraag is verstuurd. Ik reageer meestal binnen twee werkdagen.");
+    if(!r.ok){
+      let errs=[];try{errs=(await r.json()).errors||[]}catch(_){}
+      const bad=errs.find(x=>x.field==="email");
+      if(bad){f["f-mail"].setAttribute("aria-invalid","true");f["f-mail"].focus();say("Controleer je e-mailadres, Formspree accepteert het zo niet.");return;}
+      throw new Error(r.status);
+    }
+    f.reset();f["f-mail"].removeAttribute("aria-invalid");say("Bedankt, je aanvraag is verstuurd. Ik reageer meestal binnen twee werkdagen.");
   }catch(_){
     say("Versturen lukte niet. Mail je aanvraag naar fixum.heerenveen@gmail.com of bel 06 12794830.");
   }finally{btn.disabled=false;btn.textContent="Verstuur aanvraag";}

@@ -167,6 +167,9 @@ dialog img,dialog video{max-height:80vh;max-width:100%;width:auto;margin-inline:
 dialog video{width:min(1200px,94vw);background:#000}
 .shot .play{position:absolute;right:12px;top:12px;width:44px;height:44px;border-radius:50%;background:rgba(10,12,12,.55);border:2px solid rgba(255,255,255,.9);pointer-events:none;transition:transform .3s ease,background .3s ease}
 .shot .play::after{content:"";position:absolute;left:16px;top:11px;border-style:solid;border-width:9px 0 9px 14px;border-color:transparent transparent transparent #fff}
+.shot-link{display:block}
+.shot .ext-tag{position:absolute;right:12px;top:12px;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;color:#fff;background:rgba(10,12,12,.6);padding:5px 9px;border-radius:999px;pointer-events:none;transition:background .3s ease}
+.shot:hover .ext-tag{background:var(--accent)}
 .shot:hover .play{transform:scale(1.08);background:var(--accent)}
 .lb-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px 0;flex-wrap:wrap}
 .lb-bar p{margin:0;font-size:.95rem}
@@ -465,6 +468,7 @@ footer p{margin:0;max-width:70ch}
 const work=[
  ["kiten-licht","Kiten op Terschelling","Dronevideo · november 2026","lucht","video/kiten-cinematic.mp4","loop"],
  ["kiten-noordzee","Kiten op Terschelling","Dronefoto · kite van het MIWB","lucht"],
+ ["abe-bonnema-huis-op-een-duin","Huis op een duin · Abe Bonnema Prijs","Dronebeelden · oktober 2026","lucht","https://youtu.be/SRjVUtJI7n0"],
  ["video-meezingavond","Zin in Zingen · Intervocaal","Eventvideo · Oerol 2026","events","video/meezingavond.mp4"],
  ["dutch-dredging","Luchtfotografie i.o.v. Dutch Dredging","Sleephopperzuiger Van de Graaf Sr. · 2026","lucht"],
  ["video-bedrijfsfilm","Maritiem Instituut Willem Barentsz","Promotievideo · december 2025","bedrijven","video/bedrijfsfilm.mp4"],
@@ -487,9 +491,14 @@ const cats=[["alles","Alles"],["lucht","Luchtbeelden"],["bouw","Bouw en timelaps
 const grid=document.getElementById("grid"),filters=document.getElementById("filters");
 work.forEach(([f,t,s,c],i)=>{
   const fig=document.createElement("figure");fig.className="shot";fig.dataset.cat=c;fig.dataset.i=i;
-  const vid=work[i][4];
+  const vid=work[i][4],ext=/^https?:\/\//.test(vid||"");
   const crop=CROP[f]?` style="aspect-ratio:4/3;object-fit:cover;object-position:${CROP[f]}"`:"";
-  fig.innerHTML=`<button type="button" aria-label="${vid?"Speel video af":"Vergroot"}: ${t}"><img src="img/${f}.jpg" alt="${t}, ${s}" loading="lazy"${crop}></button>${vid?'<span class="play" aria-hidden="true"></span>':""}<figcaption><b>${t}</b><span>${s}</span></figcaption>`;
+  const img=`<img src="img/${f}.jpg" alt="${t}, ${s}" loading="lazy"${crop}>`;
+  if(ext)fig.dataset.ext="1";
+  fig.innerHTML=(ext
+    ?`<a class="shot-link" href="${vid}" target="_blank" rel="noopener" aria-label="Bekijk op YouTube: ${t} (opent in een nieuw tabblad)">${img}</a><span class="ext-tag" aria-hidden="true">YouTube ↗</span>`
+    :`<button type="button" aria-label="${vid?"Speel video af":"Vergroot"}: ${t}">${img}</button>${vid?'<span class="play" aria-hidden="true"></span>':""}`)
+    +`<figcaption><b>${t}</b><span>${s}</span></figcaption>`;
   grid.appendChild(fig);
 });
 cats.forEach(([k,l])=>{
@@ -504,7 +513,7 @@ filters.addEventListener("click",e=>{
 });
 const lb=document.getElementById("lb"),lbImg=document.getElementById("lb-img"),lbVid=document.getElementById("lb-vid"),lbCap=document.getElementById("lb-cap");
 let cur=0;
-const visible=()=>[...grid.querySelectorAll(".shot:not([hidden])")].map(s=>+s.dataset.i);
+const visible=()=>[...grid.querySelectorAll(".shot:not([hidden]):not([data-ext])")].map(s=>+s.dataset.i);
 function show(i){
   cur=i;const [f,t,s,,vid]=work[i];lbCap.innerHTML=`${t}<span>${s}</span>`;
   lbVid.pause();
@@ -512,7 +521,7 @@ function show(i){
   else{lbVid.hidden=true;lbVid.removeAttribute("src");lbVid.load();lbImg.hidden=false;lbImg.src=`img/${f}.jpg`;lbImg.alt=`${t}, ${s}`;}
 }
 lb.addEventListener("close",()=>lbVid.pause());
-grid.addEventListener("click",e=>{const s=e.target.closest(".shot");if(!s)return;show(+s.dataset.i);if(lb.showModal)lb.showModal();});
+grid.addEventListener("click",e=>{const s=e.target.closest(".shot");if(!s||s.dataset.ext)return;show(+s.dataset.i);if(lb.showModal)lb.showModal();});
 function step(d){const v=visible();const p=v.indexOf(cur);show(v[(p+d+v.length)%v.length]);}
 document.getElementById("lb-prev").onclick=()=>step(-1);
 document.getElementById("lb-next").onclick=()=>step(1);

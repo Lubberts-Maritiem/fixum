@@ -463,10 +463,10 @@ footer p{margin:0;max-width:70ch}
 
 <script>
 const work=[
+ ["kiten","Kiten op Terschelling","Dronevideo · november 2026","lucht","video/kiten.mp4","loop"],
  ["video-meezingavond","Zin in Zingen · Intervocaal","Eventvideo · Oerol 2026","events","video/meezingavond.mp4"],
  ["video-bedrijfsfilm","Maritiem Instituut Willem Barentsz","Promotievideo · december 2025","bedrijven","video/bedrijfsfilm.mp4"],
  ["knrm","KNRM West-Terschelling","Dronevideo · mei 2025","lucht","video/knrm.mp4"],
- ["timelapse-camera","Timelapse-opstelling","Long-term camera","bouw"],
  ["timelapse-opbouw","Opbouw evenement","Timelapse · oktober 2020","bouw","video/timelapse-opbouw.mp4","loop"],
  ["akkrum","Jachthaven Akkrum","Luchtfoto","lucht"],
  ["beter-bereikbaar-nacht","Heerenveen Beter Bereikbaar","Nachtwerk aan de weg","bouw"],
@@ -477,15 +477,17 @@ const work=[
  ["mondial-rides","Mondial Rides","KIG Heerenveen","events"],
  ["industrieterrein","Industrieterrein Heerenveen","Luchtfoto","lucht"],
  ["beter-bereikbaar-persfoto","Heerenveen Beter Bereikbaar","Persfoto","bouw"],
- ["etna-oven","Pizzeria Etna","Horeca","bedrijven"],
  ["livestream-hal","Livestream-opstelling","Camera en regie in een sporthal","live"]
 ];
+/* Staande foto's die in het overzicht als liggend vak worden bijgesneden (vergroting toont de hele foto) */
+const CROP={"livestream-hal":"center 64%"};
 const cats=[["alles","Alles"],["lucht","Luchtbeelden"],["bouw","Bouw en timelapse"],["events","Evenementen"],["live","Livestream"],["bedrijven","Bedrijven"]];
 const grid=document.getElementById("grid"),filters=document.getElementById("filters");
 work.forEach(([f,t,s,c],i)=>{
   const fig=document.createElement("figure");fig.className="shot";fig.dataset.cat=c;fig.dataset.i=i;
   const vid=work[i][4];
-  fig.innerHTML=`<button type="button" aria-label="${vid?"Speel video af":"Vergroot"}: ${t}"><img src="img/${f}.jpg" alt="${t}, ${s}" loading="lazy"></button>${vid?'<span class="play" aria-hidden="true"></span>':""}<figcaption><b>${t}</b><span>${s}</span></figcaption>`;
+  const crop=CROP[f]?` style="aspect-ratio:4/3;object-fit:cover;object-position:${CROP[f]}"`:"";
+  fig.innerHTML=`<button type="button" aria-label="${vid?"Speel video af":"Vergroot"}: ${t}"><img src="img/${f}.jpg" alt="${t}, ${s}" loading="lazy"${crop}></button>${vid?'<span class="play" aria-hidden="true"></span>':""}<figcaption><b>${t}</b><span>${s}</span></figcaption>`;
   grid.appendChild(fig);
 });
 cats.forEach(([k,l])=>{
